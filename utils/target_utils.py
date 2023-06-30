@@ -9,7 +9,8 @@ class target_encoder(object):
                  input_size:tuple=(96,128),
                  FeatureMap_shape:tuple=(3,4),
                  box_size=40,
-                 pred_size=False):
+                 pred_size=False,
+                 grids = 3*4):
 
         self.input_size = input_size
         self.FeatureMap_shape = FeatureMap_shape
@@ -22,6 +23,7 @@ class target_encoder(object):
         self.box_centers = self.get_box_centers()
         #是否预测图片尺寸
         self.pred_size = pred_size
+        self.grids = grids
     def get_box_centers(self):
         box_centers = []
         for y in range(self.FeatureMap_shape[0]):
@@ -31,7 +33,9 @@ class target_encoder(object):
                 cy = self.box_d/2+y*self.box_d-0.5
                 centers.append((cx,cy))
             box_centers.append(centers)
+        # 按照先行后列将grid的中心录入
         return box_centers
+
     # def neighbor_box_match(self,x,y,size,label):
     #     x_offset, y_offset = x % self.box_d - self.box_d / 2, y % self.box_d - self.box_d / 2
     #     box_x_idx,box_y_idx = x // self.box_d,y // self.box_d
@@ -56,33 +60,33 @@ class target_encoder(object):
     #             label[24+box_x_idx+box_y_idx*self.FeatureMap_shape[1]] = 1
 
 
-    def FirstPrinciple_matching(self,target_centers,label):
+    def FirstPrinciple_matching(self,targets,label):
 
-        for point in target_centers:
+        for point in targets:
             x, y,size = point
             box_x_idx, box_y_idx = int(x // self.box_d), int(y // self.box_d)
             box_cx,box_cy = self.box_centers[box_y_idx][box_x_idx]
             x_offset, y_offset = (x-box_cx)/self.box_size,(y-box_cy)/self.box_size
             #先验格子在label里的下标
             box_idx = box_x_idx+box_y_idx*self.FeatureMap_shape[1]
-            label[24+box_idx] = 1
+            label[2 * self.grids + box_idx] = 1
             label[2*box_idx],label[2*box_idx+1] = x_offset, y_offset
         return label
 
-    def SecondPrinciple_matching(self,target_centers,label):
+    def SecondPrinciple_matching(self,targets,label):
 
         for box_y_idx in range(self.FeatureMap_shape[0]):
             for box_x_idx in range(self.FeatureMap_shape[1]):
                 box_cx, box_cy = self.box_centers[box_y_idx][box_x_idx]
                 box_idx = box_x_idx + box_y_idx * self.FeatureMap_shape[1]
                 #如果该格子已被占用,跳过
-                if label[24+box_idx]:
+                if label[2 * self.grids + box_idx]:
                     continue
                 x_matched,y_matched = None,None
                 min_d = 100000
 
                 #当前格子与目标中心匹配
-                for point in target_centers:
+                for point in targets:
                     x, y, size = point
                     dx = x-box_cx
                     dy = y-box_cy
@@ -92,16 +96,26 @@ class target_encoder(object):
                             min_d = d
                             x_matched,y_matched = x,y
                 if x_matched is not None:
-                    label[24 + box_idx] = 1
+                    label[2 * self.grids + box_idx] = 1
                     x_offset, y_offset = (x_matched - box_cx) / self.box_size, (y_matched - box_cy) / self.box_size
                     label[2 * box_idx], label[2 * box_idx + 1] = x_offset, y_offset
         return label
+    def ThirdPrinciple_matching(self,targets,label):
+        for box_y_idx in range(self.FeatureMap_shape[0]):
+            for box_x_idx in range(self.FeatureMap_shape[1]):
+                box_idx = box_x_idx + box_y_idx * self.FeatureMap_shape[1]
+                for point in targets:
+                    x, y, size, angle = point
+                    label[3 * self.grids + box_idx] = angle
+        return label
 
-    def encode(self,target_centers):
+
+    def encode(self,targets):
         # 0:24 为目标中心相对格子中心x,y坐标偏移量， 24:为12个格子内是否有目标
-        label = np.zeros(36, dtype=np.float32)
-        label = self.FirstPrinciple_matching(target_centers,label)
-        label = self.SecondPrinciple_matching(target_centers,label)
+        label = np.zeros(4 * self.grids, dtype=np.float32)
+        label = self.FirstPrinciple_matching(targets,label)
+        label = self.SecondPrinciple_matching(targets,label)
+        label = self.ThirdPrinciple_matching(targets,label)
 
         return label
 class target_decoder(object):

@@ -12,8 +12,8 @@ def random_rotate(img):
     # mask = np.ones(img.shape[:2],dtype=np.uint8)*255
     img1 = imutils.rotate_bound(img, angle)
     # mask = imutils.rotate_bound(mask,angle)
-    img1 = cv2.resize(img1, (w,r))
-    return img1
+    img1 = cv2.resize(img1, (w, r))
+    return img1,angle
 def get_mask(img):
     r, w, _ = img.shape
     img_mask = img.copy()
@@ -22,10 +22,10 @@ def get_mask(img):
     mask = cv2.resize(mask,(w,r))
     return mask
 
-def encode(img_center_points,box_r = 32):
+def encode(targets,box_r = 32):
     label = np.zeros(36,dtype=np.float32) # 0:24 为目标中心相对格子中心x,y坐标偏移量， 24:为12个格子内是否有目标
 
-    for point in img_center_points:
+    for point in targets:
         x, y,_ = point
         box_idex = x // box_r + 4 * (y // box_r)
         x_offset, y_offset = x % box_r - box_r / 2, y % box_r - box_r / 2#相对格子中心

@@ -4,7 +4,7 @@ import cv2
 import os
 from utils.util import *
 from utils.target_utils import *
-def create_data(root,create_num,img_num,overwrite,img_path,bg_path):
+def create_data(root,create_num,img_num,overwrite,img_path,bg_path,bg_r=96,bg_w=128):
     batch_size = 1
     if os.path.exists(f'{root}/images') is not True:
         os.makedirs(f'{root}/images')
@@ -16,11 +16,11 @@ def create_data(root,create_num,img_num,overwrite,img_path,bg_path):
         t, labels = check(root)
     while t<create_num:
         dataset = RandomTarget_dataset(root = img_path,
-                              batch_size=batch_size,bg_r=96,bg_w=128,
+                              batch_size=batch_size,bg_r=bg_r,bg_w=bg_w,
                               bg_root=bg_path,
                               img_num=img_num,
                               Chinese_path=True,
-                                valid=True)
+                              valid=True)
         # save_data(dataset,f'{root}/images',train_num)
         for (img, label) in dataset:
             img1 = np.array(img[0], dtype=np.uint8)
@@ -60,7 +60,7 @@ def labels_transformation(label_path):
     np.save(label_path, new_labels)
 if __name__ == '__main__':
 
-    train_num=100000
+    train_num=10000
     valid_num=1000
     test_num=30
     labels =[]
@@ -68,11 +68,11 @@ if __name__ == '__main__':
     valid_root = './dataset/valid'
     test_root = './dataset/test'
 
-    img_path  = r'C:\Project\python\dataset\加框后的JPEG图'
-    bg_path = r'C:\Project\python\dataset\background'
+    img_path  = r'D:\Python Project\Project1\venv\dataset'
+    bg_path = r'D:\Python Project\object-locating\background'
 
     overwrite = True
-    img_num = 3
-    # create_data(root=train_root, create_num=train_num, img_num=img_num, overwrite=overwrite,img_path=img_path,bg_path=bg_path)
-    # create_data(root=valid_root,create_num=valid_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path)
-    create_data(root=test_root,create_num=test_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path)
+    img_num = 5
+    # create_data(root=train_root, create_num=train_num, img_num=img_num, overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)
+    # create_data(root=valid_root,create_num=valid_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)
+    create_data(root=test_root,create_num=test_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)

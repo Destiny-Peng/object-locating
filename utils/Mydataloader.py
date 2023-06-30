@@ -39,17 +39,16 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
         self.box_r = box_r
         self.img_size = img_size
         self.target_d = round(self.box_r*(2**0.5))#目标之间的最近距离
-        self.encoder = target_encoder()
+        self.encoder = target_encoder(input_size=(bg_r,bg_w),FeatureMap_shape=(bg_r//box_r,bg_w//box_r))#更改target的grid数目
     def get_paths_and_labels(self,root, class_num)->list:
         #针对猪肺默认双层目录读取
         img_paths = []
         if class_num == 3:
             for cls in os.listdir(root):
-                path_1 = f"{root}/{cls}"
+                path_1 = f"{root}\\{cls}"
                 for s_cls in os.listdir(path_1):
-                    path_2 = f"{path_1}/{s_cls}"
-                    for img_path in os.listdir(path_2):
-                        img_paths.append(f"{path_2}/{img_path}")
+                    path_2 = f"{path_1}\\{s_cls}"
+                    img_paths.append(path_2)
             return img_paths
 
     def creat_random_data(self,path,bg_img_path):
@@ -67,21 +66,21 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
         else:
             img_num=self.img_num
 
-        target_centers = []  # 图片中心的偏移
+        targets = []  # 图片中心的偏移
         if self.Chinese_path:
             img = cv_imread(path)
         else:
             img = cv2.imread(path)
-        #去除边框
-        img = remove_frame(img)
+        #去除边框      我直接用无框，不需要去除
+        # img = remove_frame(img)
 
         l=3#边界距离
         img0 = np.zeros((self.bg_r + self.box_r, self.bg_w + self.box_r, 3), dtype=np.uint8)
-
+        # 创建一张黑色画布,尺寸要比目标尺寸大，最后截取中间部分，这样可以包含边界不完整情况
         for i in range(img_num):
             x, y = random.randint(l, self.bg_w-1-l), random.randint(l, self.bg_r-1-l)
             t =0
-            while judge_point(target_centers, x, y,self.target_d) != True:
+            while judge_point(targets, x, y,self.target_d) != True:
                 x, y = random.randint(l, self.bg_w-1-l), random.randint(l, self.bg_r-1-l)
                 t+=1
                 if t>=50:
@@ -89,24 +88,32 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
             if t>=50:
                 break
             size = random.randint(self.img_size[0],self.img_size[1])//2*2+1
-            img_rotate = random_rotate(img)
-            img_rotate = cv2.resize(img_rotate, (size, size))
-
+            img_rotate,angle = random_rotate(img)
+            if abs(angle%90) > 15:
+                img_rotate = cv2.resize(img_rotate, (size*1.5, size*1.5))
+            else:
+                img_rotate = cv2.resize(img_rotate, (size, size))
+            #判断旋转角度，如果角度大，就适当放大图片的大小
             _x = x+self.box_r//2-(size-1)//2
             x_ = x+self.box_r//2+(size-1)//2+1
             _y = y+self.box_r//2-(size-1)//2
             y_ = y+self.box_r//2+(size-1)//2+1
             img0[_y:y_,_x:x_,:] = img_rotate[:, :, :]
-            target_centers.append([x, y,size])
+            #用旋转后的图片覆盖ground truth
+            targets.append([x, y, size, angle])
+            #将中心点和大小即旋转角度加入target
 
-        # 创建一张黑色画布,尺寸要比目标尺寸大，最后截取中间部分，这样可以包含边界不完整情况
+        #截取画面的中间部分，这样可以包含边界不完整情况
         img0 =  img0[self.box_r//2:self.box_r//2+self.bg_r,self.box_r//2:self.box_r//2+self.bg_w]
 
         mask = get_mask(img0)
+        #获得一个图片部分为0，剩余为1的mask
         bg_img = cv2.bitwise_and(bg_img, bg_img, mask=mask)
+        #按像素与，mask部分保留，剩下部分变0
         img1 = cv2.add(bg_img, img0)
+        #把背景和图片的按照像素加和即可
         # label = encode(target_centers,self.box_r)
-        label = self.encoder.encode(target_centers)
+        label = self.encoder.encode(targets)
         """
         opencv 为bgr要转rgb
         """
