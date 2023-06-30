@@ -5,6 +5,21 @@ import imutils
 import random
 from random import randint
 import matplotlib.pyplot as plt
+#综合参数
+box_r = 32 #grid 大小
+bg_w = 128 #background 宽
+bg_r = 96 #background 高
+grid_w = 4 #grid列数
+grid_r = 3 #grid行数
+size = 28 #bounding box大小
+
+
+
+
+
+
+
+
 
 def random_rotate(img):
     r,w,_ = img.shape
@@ -62,15 +77,15 @@ def result_show(img,label,decoder,model=None):
     if model is not None:
         pred = model.predict(np.expand_dims(img,axis=0))
         pred_pos = decoder.decode(pred[0])
-        img = cv2.resize(img,(128,96))
+        img = cv2.resize(img,(bg_w,bg_r))
         for point in pred_pos:
-            x, y = point
+            x, y, conf, angle = point
             cv2.circle(img, (int(x), int(y)), radius=1, color=(255, 0, 0))
-            cv2.rectangle(img, (int(x)-14, int(y)-14), (int(x)+14, int(y)+14),color=(255, 0, 0))
+            cv2.rectangle(img, (int(x)-size//2*2+1, int(y)-size//2*2+1), (int(x)+size//2*2+1, int(y)+size//2*2+1),color=(255, 0, 0))
     for i in range(3):
         for j in range(4):
-            y, x = 32 * i, 32 * j
-            img = cv2.rectangle(img, (x, y), (x + 32, y + 32), color=(0, 0, 255))
+            y, x = box_r * i, box_r * j
+            img = cv2.rectangle(img, (x, y), (x + box_r, y + box_r), color=(0, 0, 255))
     img_pos = decoder.decode(label)
     for point in img_pos:
         x, y = point
@@ -79,7 +94,6 @@ def result_show(img,label,decoder,model=None):
     plt.figure()
     plt.imshow(img)
     plt.show()
-
 if __name__=="__main__":
     # bg_img_path = r'C:\Users\du\Desktop\17_ai\make_dataset\blue_background\00000.jpg'
     # path = r'C:\Users\du\Desktop\17_ai\make_dataset\dataset_3_5\animals\cat\cat10.jpg'
