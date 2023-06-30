@@ -7,10 +7,10 @@ from random import randint
 import matplotlib.pyplot as plt
 #综合参数
 box_r = 32 #grid 大小
-bg_w = 128 #background 宽
-bg_r = 96 #background 高
-grid_w = 4 #grid列数
-grid_r = 3 #grid行数
+bg_w = 320 #background 宽
+bg_r = 224 #background 高
+grid_w = 10 #grid列数
+grid_r = 7 #grid行数
 size = 28 #bounding box大小
 
 
@@ -65,7 +65,7 @@ def decode(label,box_r = 32):
 #判断生成的坐标是否太靠近
 def judge_point(img_pos,x,y,d):
     for point in img_pos:
-        x1,y1,_ =point
+        x1,y1,_,_ =point
         if abs(x1-x)<=d and abs(y1-y)<=d:
 
             return False

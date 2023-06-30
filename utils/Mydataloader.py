@@ -23,6 +23,7 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
                  bg_w=128,
                  box_r=32,
                  img_size=(22, 28),
+                 grid=3*4,
                  img_num=None,
                  Chinese_path=False,
                  valid=False):
@@ -39,7 +40,7 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
         self.box_r = box_r
         self.img_size = img_size
         self.target_d = round(self.box_r*(2**0.5))#目标之间的最近距离
-        self.encoder = target_encoder(input_size=(bg_r,bg_w),FeatureMap_shape=(bg_r//box_r,bg_w//box_r))#更改target的grid数目
+        self.encoder = target_encoder(input_size=(bg_r,bg_w),FeatureMap_shape=(bg_r//box_r,bg_w//box_r),grids=grid)#更改target的grid数目
     def get_paths_and_labels(self,root, class_num)->list:
         #针对猪肺默认双层目录读取
         img_paths = []
@@ -90,7 +91,7 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
             size = random.randint(self.img_size[0],self.img_size[1])//2*2+1
             img_rotate,angle = random_rotate(img)
             if abs(angle%90) > 15:
-                img_rotate = cv2.resize(img_rotate, (size*1.5, size*1.5))
+                img_rotate = cv2.resize(img_rotate, (size, size))
             else:
                 img_rotate = cv2.resize(img_rotate, (size, size))
             #判断旋转角度，如果角度大，就适当放大图片的大小
@@ -172,8 +173,8 @@ if __name__=='__main__':
     #                       img_num=img_num,
     #                       Chinese_path=True)
     dataset = Fast_dataset(
-        imgs_path='../dataset/train/images',
-        labels_path='../dataset/train/labels.npy',
+        imgs_path='../dataset/test/images',
+        labels_path='../dataset/test/labels.npy',
         batch_size=batch_size
     )
 

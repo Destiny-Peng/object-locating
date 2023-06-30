@@ -4,7 +4,7 @@ import cv2
 import os
 from utils.util import *
 from utils.target_utils import *
-def create_data(root,create_num,img_num,overwrite,img_path,bg_path,bg_r=96,bg_w=128):
+def create_data(root,create_num,img_num,overwrite,img_path,bg_path,bg_r=96,bg_w=128,img_size=(22,28),grid=3*4):
     batch_size = 1
     if os.path.exists(f'{root}/images') is not True:
         os.makedirs(f'{root}/images')
@@ -15,12 +15,16 @@ def create_data(root,create_num,img_num,overwrite,img_path,bg_path,bg_r=96,bg_w=
 
         t, labels = check(root)
     while t<create_num:
-        dataset = RandomTarget_dataset(root = img_path,
-                              batch_size=batch_size,bg_r=bg_r,bg_w=bg_w,
-                              bg_root=bg_path,
-                              img_num=img_num,
-                              Chinese_path=True,
-                              valid=True)
+        dataset = RandomTarget_dataset(root=img_path,
+                                       batch_size=batch_size,
+                                       bg_r=bg_r,
+                                       bg_w=bg_w,
+                                       bg_root=bg_path,
+                                       img_num=img_num,
+                                       img_size=img_size,
+                                       grid=grid,
+                                       Chinese_path=True,
+                                       valid=True)
         # save_data(dataset,f'{root}/images',train_num)
         for (img, label) in dataset:
             img1 = np.array(img[0], dtype=np.uint8)
@@ -75,4 +79,4 @@ if __name__ == '__main__':
     img_num = 5
     # create_data(root=train_root, create_num=train_num, img_num=img_num, overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)
     # create_data(root=valid_root,create_num=valid_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)
-    create_data(root=test_root,create_num=test_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)
+    create_data(root=test_root,create_num=test_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320,img_size=(24,30),grid=7*10)
