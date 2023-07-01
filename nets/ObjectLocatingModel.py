@@ -41,6 +41,7 @@ class ShuoShuoNet:
         self.target_conf = keras.layers.Conv2D(1,kernel_size=(3,3),padding='same')
         self.conf_flatten = keras.layers.Flatten()
         self.conf_activations = tf.keras.activations.sigmoid
+        self.target_angle = keras.layers.Conv2D(1,kernel_size=(3,3),padding='same')
     def model(self):
         inputs = self.Input_layer
         x=  self.rescale_layer(inputs)
@@ -56,7 +57,12 @@ class ShuoShuoNet:
         conf_outputs = self.conf_flatten(conf_outputs)
         conf_outputs = self.conf_activations(conf_outputs)
 
-        outputs = keras.layers.Concatenate()([coord_outputs,conf_outputs])
+        #角度头
+        angle_outputs = self.target_angle(x)
+        angle_outputs = self.conf_flatten(angle_outputs)
+        angle_outputs = self.conf_activations(angle_outputs)
+
+        outputs = keras.layers.Concatenate()([coord_outputs,conf_outputs,angle_outputs])
         model = keras.Model(inputs, outputs)
         return model
 if __name__=='__main__':

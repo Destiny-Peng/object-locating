@@ -145,7 +145,6 @@ class target_decoder(object):
             box_centers.append(centers)
         return box_centers
     def NMS(self,coords):
-        print(coords)
         score = coords[:,2]
         tep = coords[:,:2]          #coords包括坐标和角度
         order_idx = np.argsort(-score)#按conf值从大到小排序的下标

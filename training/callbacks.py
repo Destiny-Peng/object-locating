@@ -4,6 +4,7 @@ import tensorflow as tf
 from utils.Mydataloader import Fast_dataset
 from utils.target_utils import *
 import cv2
+from parameters import *
 
 class MyTensorboardCallback(keras.callbacks.Callback):
     def __init__(self,log_dir:str,test_dir:str='./dataset/test',input_size=(96,128),test_img_num=30):
@@ -26,20 +27,20 @@ class MyTensorboardCallback(keras.callbacks.Callback):
 
         imgs_=[]
         for img,label,y_pred in zip(imgs,labels,y_pred):
-            img = cv2.resize(img,(128,96))
-            for i in range(3):
-                for j in range(4):
-                    y, x = 32 * i, 32 * j
-                    img = cv2.rectangle(img, (x, y), (x + 32, y + 32), color=(0, 0, 255))
+            img = cv2.resize(img,(bg_w,bg_r))
+            for i in range(grid_r):
+                for j in range(grid_w):
+                    y, x = box_r * i, box_r * j
+                    img = cv2.rectangle(img, (x, y), (x + box_r, y + box_r), color=(0, 0, 255))
 
             img_pos = self.decoder.decode(label)
             for point in img_pos:
-                x, y = point
+                x, y, angle = point
                 cv2.circle(img, (int(x), int(y)), radius=2, color=(0, 255, 0))
             y_pred = np.array(y_pred)
             img_pos_pred = self.decoder.decode(y_pred)
             for point in img_pos_pred:
-                x, y = point
+                x, y, angle = point
                 cv2.circle(img, (int(x), int(y)), radius=2, color=(255, 0, 0))
             imgs_.append(img)
         return np.array(imgs_)

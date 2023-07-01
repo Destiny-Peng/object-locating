@@ -4,13 +4,14 @@ from training.loss_function import SSD_loss
 from training.metrics import Recall
 import time
 from nets.ObjectLocatingModel import ShuoShuoNet
+from parameters import *
 
 if __name__=='__main__':
-    batch_size =512
-    img_num=3
+    batch_size =128
+    img_num=5
     BN_momentum=0.99
-    input_size = (48,64)
-    input_shape = (input_size[0], input_size[1], 3)
+    input_shape = (bg_r, bg_w, 3)
+
     # train_dataset = RandomTarget_dataset(root = r'C:\Project\python\dataset\加框后的JPEG图',
     #                       batch_size=batch_size,bg_r=96,bg_w=128,
     #                       bg_root=r'C:\Project\python\dataset\background',
@@ -27,28 +28,27 @@ if __name__=='__main__':
         imgs_path='./dataset/train/images',
         labels_path='./dataset/train/labels.npy',
         batch_size=batch_size,
-        input_size=input_size
+        input_size=(bg_r,bg_w)
     )
     valid_dataset =  Fast_dataset(
         imgs_path='./dataset/valid/images',
         labels_path='./dataset/valid/labels.npy',
         batch_size=batch_size,
-        input_size=input_size
+        input_size=(bg_r,bg_w)
     )
 
 
     model = ShuoShuoNet(input_shape=input_shape,
                         alpha=0.35,
-                        FeatureMap_shape=(3,4)
+                        FeatureMap_shape=(grid_r,grid_w)
                         ).model()
     for layer in model.layers:
         if type(layer) == type(keras.layers.BatchNormalization()):
             layer.momentum = BN_momentum
     model.summary()
-    loss_fn = SSD_loss()
     model.compile(optimizer=keras.optimizers.Adam(),
-                  loss=loss_fn,
-                  metrics=[Recall()])
+                  loss=SSD_loss(),
+                  metrics=[Recall(grid=(grid_r,grid_w))])
 
     save_path = './models_save/%s' % (time.strftime('%Y_%m_%d_%H_%M_%S'))
 
@@ -56,7 +56,7 @@ if __name__=='__main__':
                                                    save_best_only=True, monitor='val_loss')
     reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1)
     early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=30, verbose=1)
-    tensorboard_callback = MyTensorboardCallback('logs',input_size=input_size)
+    tensorboard_callback = MyTensorboardCallback('logs',input_size=(bg_r,bg_w))
 
     callback_list=[save_weights,reduce_lr,early_stop,tensorboard_callback]
     hist = model.fit(train_dataset,
