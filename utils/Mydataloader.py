@@ -19,11 +19,11 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
     def __init__(self,root: str,
                  batch_size: int,
                  bg_root,
-                 bg_r=96,
-                 bg_w=128,
-                 box_r=32,
+                 bg_r=bg_r,
+                 bg_w=bg_w,
+                 box_r=box_r,
                  img_size=(22, 28),
-                 grid=3*4,
+                 grid=(grid_r,grid_w),
                  img_num=None,
                  Chinese_path=False,
                  valid=False):
@@ -39,8 +39,9 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
         self.Chinese_path=Chinese_path
         self.box_r = box_r
         self.img_size = img_size
+        self.grid_r, self.grid_w = grid
         self.target_d = round(self.box_r*(2**0.5))#目标之间的最近距离
-        self.encoder = target_encoder(input_size=(bg_r,bg_w),FeatureMap_shape=(bg_r//box_r,bg_w//box_r),grids=grid)#更改target的grid数目
+        self.encoder = target_encoder(input_size=(bg_r,bg_w),grid=grid)#更改target的grid数目
     def get_paths_and_labels(self,root, class_num)->list:
         #针对猪肺默认双层目录读取
         img_paths = []
@@ -88,17 +89,16 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
                     break
             if t>=50:
                 break
-            size = random.randint(self.img_size[0],self.img_size[1])//2*2+1
+            size = random.randint(self.img_size[0], self.img_size[1]) // 2 * 2 + 1
             img_rotate,angle = random_rotate(img)
             if abs(angle%90) > 15:
-                img_rotate = cv2.resize(img_rotate, (size, size))
-            else:
-                img_rotate = cv2.resize(img_rotate, (size, size))
+                size = int(size*1.2)
+            img_rotate = cv2.resize(img_rotate, (size, size))
             #判断旋转角度，如果角度大，就适当放大图片的大小
             _x = x+self.box_r//2-(size-1)//2
-            x_ = x+self.box_r//2+(size-1)//2+1
+            x_ = _x + size
             _y = y+self.box_r//2-(size-1)//2
-            y_ = y+self.box_r//2+(size-1)//2+1
+            y_ = _y + size
             img0[_y:y_,_x:x_,:] = img_rotate[:, :, :]
             #用旋转后的图片覆盖ground truth
             targets.append([x, y, size, angle])

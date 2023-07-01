@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from nets.backbone import mobilenet_backbone
+from parameters import *
 
 '''
 art QQVGA为160x120，考虑96x128输入
@@ -16,9 +17,9 @@ art QQVGA为160x120，考虑96x128输入
 
 class ShuoShuoNet:
     def __init__(self,
-                 input_shape: tuple = (96, 128, 3),
+                 input_shape: tuple = (bg_r, bg_w, 3),
                  alpha=0.35,
-                 FeatureMap_shape: tuple = (3, 4),
+                 FeatureMap_shape: tuple = (grid_r, grid_w),
                  backbone=None,
                  ):
 

@@ -4,7 +4,9 @@ import cv2
 import os
 from utils.util import *
 from utils.target_utils import *
-def create_data(root,create_num,img_num,overwrite,img_path,bg_path,bg_r=96,bg_w=128,img_size=(22,28),grid=3*4):
+from parameters import *
+
+def create_data(root,create_num,img_num,overwrite,img_path,bg_path,bg_r=bg_r,bg_w=bg_w,img_size=(22,28),grid=(grid_r,grid_w)):
     batch_size = 1
     if os.path.exists(f'{root}/images') is not True:
         os.makedirs(f'{root}/images')
@@ -50,18 +52,18 @@ def check(root):
     return t,labels
 
 #旧版编码转新版编码
-def labels_transformation(label_path):
-    labels =np.load(label_path)
-    new_labels = []
-    encoder = target_encoder()
-    for label in labels:
-        coords = decode(label)
-        size = np.zeros((coords.shape[0],1))
-        coords = np.concatenate((coords,size),axis=1)
-        new_label = encoder.encode(coords)
-        new_labels.append(new_label)
-        # print(new_label)
-    np.save(label_path, new_labels)
+# def labels_transformation(label_path):
+#     labels =np.load(label_path)
+#     new_labels = []
+#     encoder = target_encoder()
+#     for label in labels:
+#         coords = decode(label)
+#         size = np.zeros((coords.shape[0],1))
+#         coords = np.concatenate((coords,size),axis=1)
+#         new_label = encoder.encode(coords)
+#         new_labels.append(new_label)
+#         # print(new_label)
+#     np.save(label_path, new_labels)
 if __name__ == '__main__':
 
     train_num=10000
@@ -77,6 +79,9 @@ if __name__ == '__main__':
 
     overwrite = True
     img_num = 5
-    # create_data(root=train_root, create_num=train_num, img_num=img_num, overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)
-    # create_data(root=valid_root,create_num=valid_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320)
-    create_data(root=test_root,create_num=test_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,bg_r=224,bg_w=320,img_size=(24,30),grid=7*10)
+    create_data(root=train_root, create_num=train_num, img_num=img_num, overwrite=overwrite,img_path=img_path,bg_path=bg_path,
+                bg_r=bg_r,bg_w=bg_w,img_size=(24,30),grid=(grid_r,grid_w))
+    # create_data(root=valid_root,create_num=valid_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,
+    #             bg_r=bg_r,bg_w=bg_w,img_size=(24,30),grid=(grid_r,grid_w))
+    # create_data(root=test_root,create_num=test_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,
+    #             bg_r=bg_r,bg_w=bg_w,img_size=(24,30),grid=(grid_r,grid_w))

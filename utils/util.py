@@ -5,18 +5,7 @@ import imutils
 import random
 from random import randint
 import matplotlib.pyplot as plt
-#综合参数
-box_r = 32 #grid 大小
-bg_w = 320 #background 宽
-bg_r = 224 #background 高
-grid_w = 10 #grid列数
-grid_r = 7 #grid行数
-size = 28 #bounding box大小
-
-
-
-
-
+from parameters import *
 
 
 
@@ -37,30 +26,30 @@ def get_mask(img):
     mask = cv2.resize(mask,(w,r))
     return mask
 
-def encode(targets,box_r = 32):
-    label = np.zeros(36,dtype=np.float32) # 0:24 为目标中心相对格子中心x,y坐标偏移量， 24:为12个格子内是否有目标
-
-    for point in targets:
-        x, y,_ = point
-        box_idex = x // box_r + 4 * (y // box_r)
-        x_offset, y_offset = x % box_r - box_r / 2, y % box_r - box_r / 2#相对格子中心
-        # x_offset, y_offset = x % box_r, y % box_r  # 相对格子左上角
-        x_offset, y_offset = x_offset / box_r, y_offset / box_r  # 归一化
-        label[2 * box_idex], label[2 * box_idex + 1] = x_offset, y_offset
-        label[24 + box_idex] = 1
-
-    return label
-def decode(label,box_r = 32):
-    judge_conf = label[24:]
-    pos =[]
-
-    for idx,point in enumerate(judge_conf):
-        if point>=0.5:
-            x_offset,y_offset = label[2*idx],label[2*idx+1]
-            x,y = idx%4*32+x_offset*box_r+box_r/2,idx//4*32+y_offset*box_r+box_r/2#相对格子中心
-            #x, y = idx % 4 * 32 + x_offset * box_r, idx // 4 * 32 + y_offset * box_r  # 相对格子左上角
-            pos.append([x,y])
-    return np.round(pos)
+# def encode(targets,box_r = 32):
+#     label = np.zeros(36,dtype=np.float32) # 0:24 为目标中心相对格子中心x,y坐标偏移量， 24:为12个格子内是否有目标
+#
+#     for point in targets:
+#         x, y,_ = point
+#         box_idex = x // box_r + 4 * (y // box_r)
+#         x_offset, y_offset = x % box_r - box_r / 2, y % box_r - box_r / 2#相对格子中心
+#         # x_offset, y_offset = x % box_r, y % box_r  # 相对格子左上角
+#         x_offset, y_offset = x_offset / box_r, y_offset / box_r  # 归一化
+#         label[2 * box_idex], label[2 * box_idex + 1] = x_offset, y_offset
+#         label[24 + box_idex] = 1
+#
+#     return label
+# def decode(label,box_r = 32):
+#     judge_conf = label[24:]
+#     pos =[]
+#
+#     for idx,point in enumerate(judge_conf):
+#         if point>=0.5:
+#             x_offset,y_offset = label[2*idx],label[2*idx+1]
+#             x,y = idx%4*32+x_offset*box_r+box_r/2,idx//4*32+y_offset*box_r+box_r/2#相对格子中心
+#             #x, y = idx % 4 * 32 + x_offset * box_r, idx // 4 * 32 + y_offset * box_r  # 相对格子左上角
+#             pos.append([x,y])
+#     return np.round(pos)
 
 #判断生成的坐标是否太靠近
 def judge_point(img_pos,x,y,d):
@@ -80,7 +69,7 @@ def result_show(img,label,decoder,model=None):
         img = cv2.resize(img,(bg_w,bg_r))
         for point in pred_pos:
             x, y, conf, angle = point
-            cv2.circle(img, (int(x), int(y)), radius=1, color=(255, 0, 0))
+            cv2.circle(img, (int(x), int(y)), radius=1, color=(255, 255, 0))
             cv2.rectangle(img, (int(x)-size//2*2+1, int(y)-size//2*2+1), (int(x)+size//2*2+1, int(y)+size//2*2+1),color=(255, 0, 0))
     for i in range(3):
         for j in range(4):
@@ -88,8 +77,8 @@ def result_show(img,label,decoder,model=None):
             img = cv2.rectangle(img, (x, y), (x + box_r, y + box_r), color=(0, 0, 255))
     img_pos = decoder.decode(label)
     for point in img_pos:
-        x, y = point
-        cv2.circle(img, (int(x), int(y)), radius=2, color=(0, 255, 0))
+        x, y, angle = point
+        cv2.circle(img, (int(x), int(y)), radius=2, color=(255, 255, 0))
 
     plt.figure()
     plt.imshow(img)
