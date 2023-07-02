@@ -12,18 +12,6 @@ if __name__=='__main__':
     BN_momentum=0.99
     input_shape = (bg_r, bg_w, 3)
 
-    # train_dataset = RandomTarget_dataset(root = r'C:\Project\python\dataset\加框后的JPEG图',
-    #                       batch_size=batch_size,bg_r=96,bg_w=128,
-    #                       bg_root=r'C:\Project\python\dataset\background',
-    #                       img_num=img_num,
-    #                       Chinese_path=True)
-    # valid_dataset = RandomTarget_dataset(root = r'C:\Project\python\dataset\加框后的JPEG图',
-    #                       batch_size=batch_size,bg_r=96,bg_w=128,
-    #                       bg_root=r'C:\Project\python\dataset\background',
-    #                       img_num=img_num,
-    #                       Chinese_path=True,
-    #                       valid=True
-    #                      )
     train_dataset = Fast_dataset(
         imgs_path='./dataset/train/images',
         labels_path='./dataset/train/labels.npy',
@@ -56,11 +44,11 @@ if __name__=='__main__':
                                                    save_best_only=True, monitor='val_loss')
     reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1)
     early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=30, verbose=1)
-    tensorboard_callback = MyTensorboardCallback('logs',input_size=(bg_r,bg_w))
+    # tensorboard_callback = MyTensorboardCallback('logs',input_size=(bg_r,bg_w))
 
-    callback_list=[save_weights,reduce_lr,early_stop,tensorboard_callback]
+    callback_list=[save_weights,reduce_lr,early_stop]
     hist = model.fit(train_dataset,
-                     epochs=200,
+                     epochs=100,
                      workers=8,
                      validation_data=valid_dataset,
                      callbacks=callback_list

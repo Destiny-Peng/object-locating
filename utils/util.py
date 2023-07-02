@@ -68,11 +68,13 @@ def result_show(img,label,decoder,model=None):
         pred_pos = decoder.decode(pred[0])
         img = cv2.resize(img,(bg_w,bg_r))
         for point in pred_pos:
-            x, y, conf, angle = point
+            x, y, angle = point
+            print(x,y,angle)
             cv2.circle(img, (int(x), int(y)), radius=1, color=(255, 255, 0))
             cv2.rectangle(img, (int(x)-size//2*2+1, int(y)-size//2*2+1), (int(x)+size//2*2+1, int(y)+size//2*2+1),color=(255, 0, 0))
-    for i in range(3):
-        for j in range(4):
+            cv2.putText(img,text='angle={}'.format(round(angle*360.0,2)),org=(int(x)-size//2*2+1, int(y)+size//2*2+1),fontFace=cv2.FONT_HERSHEY_SIMPLEX,fontScale=0.4,color=(255,255,0))
+    for i in range(grid_r):
+        for j in range(grid_w):
             y, x = box_r * i, box_r * j
             img = cv2.rectangle(img, (x, y), (x + box_r, y + box_r), color=(0, 0, 255))
     img_pos = decoder.decode(label)

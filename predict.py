@@ -5,18 +5,17 @@ from utils.target_utils import target_decoder
 def predict(model,dataset):
     for (img, label) in dataset:
         img1 = np.array(img[0], dtype=np.uint8)
-        print(label)
+        # print(label)
         result_show(img1,label[0],target_decoder(),model)
 
 
 
 if __name__ =='__main__':
 
-    model = keras.models.load_model('models_save/2023_06_28_20_40_08/model_97_0.0419.h5',compile=False)
-    model.summary()
+    model = keras.models.load_model('models_save/2023_07_01_21_06_38/model_36_0.0248.h5',compile=False)
+    # model.summary()
     batch_size =1
-    img_num=3
-    input_size = (48,64)
+    img_num=5
     # valid_dataset = RandomTarget_dataset(root = r'D:\Python Project\Project1\venv\dataset',
     #                       batch_size=batch_size,
     #                       bg_r=96,
@@ -30,6 +29,6 @@ if __name__ =='__main__':
         imgs_path='./dataset/valid/images',
         labels_path='./dataset/valid/labels.npy',
         batch_size=batch_size,
-        input_size=input_size
+        input_size=(bg_r,bg_w)
     )
     predict(model,valid_dataset)

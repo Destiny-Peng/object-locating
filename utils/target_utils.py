@@ -99,7 +99,7 @@ class target_encoder(object):
                     label[2 * self.grid_w*self.grid_r + box_idx] = 1
                     x_offset, y_offset = (x_matched - box_cx) / self.box_size, (y_matched - box_cy) / self.box_size
                     label[2 * box_idx], label[2 * box_idx + 1] = x_offset, y_offset
-                    label[3 * self.grid_w*self.grid_r + box_idx] = angle_reserve
+                    label[3 * self.grid_w*self.grid_r + box_idx] = angle_reserve/360
         return label
 
 
@@ -145,6 +145,7 @@ class target_decoder(object):
             box_centers.append(centers)
         return box_centers
     def NMS(self,coords):
+        # print(coords)
         score = coords[:,2]
         tep = coords[:,:2]          #coords包括坐标和角度
         order_idx = np.argsort(-score)#按conf值从大到小排序的下标
@@ -176,7 +177,7 @@ class target_decoder(object):
         targets = np.array(targets)
         if len(targets):
             targets = self.NMS(targets)
-        return np.round(targets)
+        return targets
 if __name__ == '__main__':
     encoder = target_encoder()
     target_centers =[

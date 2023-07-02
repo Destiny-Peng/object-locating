@@ -25,7 +25,7 @@ class Angle_Loss(tf.losses.Loss):
     super().__init__(reduction=tf.losses.Reduction.NONE, name='angle_loss')
 
   def call(self, y_true, y_pred):
-    angle_loss = tf.abs(y_true - y_pred)/36 # 取预测与真实角度的绝对值差作为误差
+    angle_loss = tf.square(y_true - y_pred) # 取预测与真实角度的绝对值差作为误差
     return tf.reduce_mean(angle_loss, axis=-1) # 沿着最后一个轴(batch内的样本)取平均
 class Smooth_L1_loss(tf.losses.Loss):
     def __init__(self, delta=1):
