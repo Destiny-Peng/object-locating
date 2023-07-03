@@ -80,8 +80,8 @@ if __name__ == '__main__':
     overwrite = True
     img_num = 5
     create_data(root=train_root, create_num=train_num, img_num=img_num, overwrite=overwrite,img_path=img_path,bg_path=bg_path,
-                bg_r=bg_r,bg_w=bg_w,img_size=(24,30),grid=(grid_r,grid_w))
+                bg_r=bg_r,bg_w=bg_w,img_size=img_size,grid=(grid_r,grid_w))
     create_data(root=valid_root,create_num=valid_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,
-                bg_r=bg_r,bg_w=bg_w,img_size=(24,30),grid=(grid_r,grid_w))
+                bg_r=bg_r,bg_w=bg_w,img_size=img_size,grid=(grid_r,grid_w))
     # create_data(root=test_root,create_num=test_num,img_num=img_num,overwrite=overwrite,img_path=img_path,bg_path=bg_path,
-    #             bg_r=bg_r,bg_w=bg_w,img_size=(24,30),grid=(grid_r,grid_w))
+    #             bg_r=bg_r,bg_w=bg_w,img_size=img_size,grid=(grid_r,grid_w))

@@ -185,8 +185,8 @@ if __name__ == '__main__':
         [64,64,2,58]
                      ]
     label = encoder.encode(target_centers)
-    print(label)
+    print(list(label))
     decoder = target_decoder()
 
     coords = decoder.decode(label)
-    print(coords)
+    # print(coords)

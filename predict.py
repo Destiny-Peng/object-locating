@@ -12,7 +12,7 @@ def predict(model,dataset):
 
 if __name__ =='__main__':
 
-    model = keras.models.load_model('models_save/2023_07_01_21_06_38/model_36_0.0248.h5',compile=False)
+    model = keras.models.load_model('models_save/2023_07_02_11_02_50/model_32_0.0589.h5',compile=False)
     # model.summary()
     batch_size =1
     img_num=5

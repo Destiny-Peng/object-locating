@@ -22,7 +22,7 @@ def get_mask(img):
     r, w, _ = img.shape
     img_mask = img.copy()
     img_mask = cv2.cvtColor(img_mask,cv2.COLOR_BGR2GRAY)
-    _,mask = cv2.threshold(img_mask,50,255,cv2.THRESH_BINARY_INV)
+    _,mask = cv2.threshold(img_mask,10,255,cv2.THRESH_BINARY_INV)
     mask = cv2.resize(mask,(w,r))
     return mask
 
@@ -80,7 +80,7 @@ def result_show(img,label,decoder,model=None):
     img_pos = decoder.decode(label)
     for point in img_pos:
         x, y, angle = point
-        cv2.circle(img, (int(x), int(y)), radius=2, color=(255, 255, 0))
+        cv2.circle(img, (int(x), int(y)), radius=2, color=(255, 255, 255))
 
     plt.figure()
     plt.imshow(img)

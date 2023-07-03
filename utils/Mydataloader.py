@@ -76,8 +76,8 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
         #去除边框      我直接用无框，不需要去除
         # img = remove_frame(img)
 
-        l=3#边界距离
-        img0 = np.zeros((self.bg_r + self.box_r, self.bg_w + self.box_r, 3), dtype=np.uint8)
+        l=16#边界距离
+        img0 = np.zeros((self.bg_r + 2*self.box_r, self.bg_w + 2*self.box_r, 3), dtype=np.uint8)
         # 创建一张黑色画布,尺寸要比目标尺寸大，最后截取中间部分，这样可以包含边界不完整情况
         for i in range(img_num):
             x, y = random.randint(l, self.bg_w-1-l), random.randint(l, self.bg_r-1-l)
@@ -89,17 +89,15 @@ class RandomTarget_dataset(tf.keras.utils.Sequence):
                     break
             if t>=50:
                 break
-            size = random.randint(self.img_size[0], self.img_size[1]) // 2 * 2 + 1
+            size = random.randint(self.img_size[0], self.img_size[1]) // 2 * 2
             img_rotate,angle = random_rotate(img)
             if abs(angle%90) > 15:
                 size = int(size*1.2)
             img_rotate = cv2.resize(img_rotate, (size, size))
             #判断旋转角度，如果角度大，就适当放大图片的大小
-            _x = x+self.box_r//2-(size-1)//2
-            x_ = _x + size
-            _y = y+self.box_r//2-(size-1)//2
-            y_ = _y + size
-            img0[_y:y_,_x:x_,:] = img_rotate[:, :, :]
+            _x = x+self.box_r//2-size//2
+            _y = y+self.box_r//2-size//2
+            img0[_y:_y + size,_x:_x + size,:] = img_rotate[:, :, :]
             #用旋转后的图片覆盖ground truth
             targets.append([x, y, size, angle])
             #将中心点和大小即旋转角度加入target

@@ -5,4 +5,5 @@ bg_w = 320 #background 宽
 bg_r = 224 #background 高
 grid_w = 10 #grid列数
 grid_r = 7 #grid行数
-size = 28 #bounding box大小
+size = 40 #bounding box大小
+img_size=(40,48) #随机object的大小范围
